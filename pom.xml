@@ -9,7 +9,7 @@
     <name>Display Upstream Changes</name>
     <groupId>org.jvnet.hudson.plugins</groupId>
     <artifactId>display-upstream-changes</artifactId>
-    <version>0.1-SNAPSHOT</version>
+    <version>0.1</version>
     <packaging>hpi</packaging>
     <url>http://wiki.jenkins-ci.org/display/JENKINS/Display+Upstream+Changes+Plugin</url>
 
