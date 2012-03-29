@@ -1,0 +1,4 @@
+Display Upstream Changes Plugin
+
+This is a simple plugin that will display change log sets from
+upstream builds on a build's summary page.
