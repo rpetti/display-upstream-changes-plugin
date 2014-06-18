@@ -117,7 +117,7 @@ public class DisplayUpstreamChangesSummaryAction implements Action {
     private static AbstractBuild getUpstreamByCause(AbstractBuild build) {
         for(Cause cause: (List<Cause>) build.getCauses()){
             if(cause instanceof Cause.UpstreamCause) {
-                TopLevelItem upstreamProject = Hudson.getInstance().getItem(((Cause.UpstreamCause)cause).getUpstreamProject());
+                TopLevelItem upstreamProject = Hudson.getInstance().getItemByFullName(((Cause.UpstreamCause)cause).getUpstreamProject(), TopLevelItem.class);
                 if(upstreamProject instanceof AbstractProject){
                     int buildId = ((Cause.UpstreamCause)cause).getUpstreamBuild();
                     Run run = ((AbstractProject) upstreamProject).getBuildByNumber(buildId);
