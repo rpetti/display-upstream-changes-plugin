@@ -86,16 +86,14 @@ public class DisplayUpstreamChangesSummaryAction implements Action {
     public List<UpstreamChangeLog> getUpstreamChangeLogs(){
         List<UpstreamChangeLog> upstreamChangeLogs = new ArrayList<UpstreamChangeLog>();
         List<ChangeLogSet> changeLogSets = new ArrayList<ChangeLogSet>();
-        Map<AbstractProject,Integer> transitiveUpstreamBuilds = build.getTransitiveUpstreamBuilds();
-        for(Entry<AbstractProject,Integer> e : transitiveUpstreamBuilds.entrySet()){
-            Run run = e.getKey().getBuildByNumber(e.getValue());
-            if(run instanceof AbstractBuild){
-                if(((AbstractBuild)run).hasChangeSetComputed()){
-                    ChangeLogSet cls = ((AbstractBuild)run).getChangeSet();
-                    if(cls != null){
-                        changeLogSets.add(cls);
-                        upstreamChangeLogs.add(new UpstreamChangeLog(cls, (AbstractBuild)run));
-                    }
+        Map<AbstractProject<?,?>,Integer> transitiveUpstreamBuilds = build.getTransitiveUpstreamBuilds();
+        for(Entry<AbstractProject<?,?>,Integer> e : transitiveUpstreamBuilds.entrySet()){
+            AbstractBuild<?,?> run = e.getKey().getBuildByNumber(e.getValue());
+            if (run.hasChangeSetComputed()) {
+                ChangeLogSet<?> cls = run.getChangeSet();
+                if (cls != null) {
+                    changeLogSets.add(cls);
+                    upstreamChangeLogs.add(new UpstreamChangeLog(cls, run));
                 }
             }
         }
