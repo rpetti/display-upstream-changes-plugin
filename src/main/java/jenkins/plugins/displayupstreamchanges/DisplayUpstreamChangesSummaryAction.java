@@ -86,6 +86,7 @@ public class DisplayUpstreamChangesSummaryAction implements Action {
     public List<UpstreamChangeLog> getUpstreamChangeLogs(){
         List<UpstreamChangeLog> upstreamChangeLogs = new ArrayList<UpstreamChangeLog>();
         List<ChangeLogSet> changeLogSets = new ArrayList<ChangeLogSet>();
+        //Upstream builds via fingerprinting
         Map<AbstractProject,Integer> transitiveUpstreamBuilds = build.getTransitiveUpstreamBuilds();
         for(Entry<AbstractProject,Integer> e : transitiveUpstreamBuilds.entrySet()){
             Run run = e.getKey().getBuildByNumber(e.getValue());
@@ -99,9 +100,10 @@ public class DisplayUpstreamChangesSummaryAction implements Action {
                 }
             }
         }
-        
-        AbstractBuild build = this.build;
-        while( (build = getUpstreamByCause(build)) != null) {
+        //Upstream builds via cause
+        List<AbstractBuild> upstreamBuilds = new ArrayList<AbstractBuild>();
+        getAllUpstreamByCause(this.build, upstreamBuilds);
+        for(AbstractBuild build : upstreamBuilds) {
             if(build.hasChangeSetComputed()){
                 ChangeLogSet cls = build.getChangeSet();
                 if(!changeLogSets.contains(cls)){
@@ -113,8 +115,22 @@ public class DisplayUpstreamChangesSummaryAction implements Action {
         
         return upstreamChangeLogs;
     }
-    
-    private static AbstractBuild getUpstreamByCause(AbstractBuild build) {
+
+    private static void getAllUpstreamByCause(AbstractBuild build, List<AbstractBuild> list) {
+        for(AbstractBuild upstreamBuild : getUpstreamByCause(build)) {
+            //Duplication and cycle protection
+            if(list.contains(upstreamBuild)){
+                continue;
+            } else {
+                list.add(upstreamBuild);
+                getAllUpstreamByCause(upstreamBuild, list);
+            }
+        }
+        return;
+    }
+
+    private static List<AbstractBuild> getUpstreamByCause(AbstractBuild build) {
+        List<AbstractBuild> upstreamBuilds = new ArrayList<AbstractBuild>();
         for(Cause cause: (List<Cause>) build.getCauses()){
             if(cause instanceof Cause.UpstreamCause) {
                 TopLevelItem upstreamProject = Hudson.getInstance().getItem(((Cause.UpstreamCause)cause).getUpstreamProject());
@@ -122,12 +138,12 @@ public class DisplayUpstreamChangesSummaryAction implements Action {
                     int buildId = ((Cause.UpstreamCause)cause).getUpstreamBuild();
                     Run run = ((AbstractProject) upstreamProject).getBuildByNumber(buildId);
                     if(run instanceof AbstractBuild){
-                        return (AbstractBuild) run;
+                        upstreamBuilds.add((AbstractBuild) run);
                     }
                 }
             }
         }
-        return null;
+        return upstreamBuilds;
     }
     
 }
