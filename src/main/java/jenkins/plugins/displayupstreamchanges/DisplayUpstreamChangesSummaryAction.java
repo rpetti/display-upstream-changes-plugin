@@ -86,6 +86,7 @@ public class DisplayUpstreamChangesSummaryAction implements Action {
     public List<UpstreamChangeLog> getUpstreamChangeLogs(){
         List<UpstreamChangeLog> upstreamChangeLogs = new ArrayList<UpstreamChangeLog>();
         List<ChangeLogSet> changeLogSets = new ArrayList<ChangeLogSet>();
+        //Get upstream builds from fingerprinting
         Map<AbstractProject<?,?>,Integer> transitiveUpstreamBuilds = build.getTransitiveUpstreamBuilds();
         for(Entry<AbstractProject<?,?>,Integer> e : transitiveUpstreamBuilds.entrySet()){
             AbstractBuild<?,?> run = e.getKey().getBuildByNumber(e.getValue());
