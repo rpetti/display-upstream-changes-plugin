@@ -86,17 +86,14 @@ public class DisplayUpstreamChangesSummaryAction implements Action {
     public List<UpstreamChangeLog> getUpstreamChangeLogs(){
         List<UpstreamChangeLog> upstreamChangeLogs = new ArrayList<UpstreamChangeLog>();
         List<ChangeLogSet> changeLogSets = new ArrayList<ChangeLogSet>();
-        //Upstream builds via fingerprinting
-        Map<AbstractProject,Integer> transitiveUpstreamBuilds = build.getTransitiveUpstreamBuilds();
-        for(Entry<AbstractProject,Integer> e : transitiveUpstreamBuilds.entrySet()){
-            Run run = e.getKey().getBuildByNumber(e.getValue());
-            if(run instanceof AbstractBuild){
-                if(((AbstractBuild)run).hasChangeSetComputed()){
-                    ChangeLogSet cls = ((AbstractBuild)run).getChangeSet();
-                    if(cls != null){
-                        changeLogSets.add(cls);
-                        upstreamChangeLogs.add(new UpstreamChangeLog(cls, (AbstractBuild)run));
-                    }
+        Map<AbstractProject<?,?>,Integer> transitiveUpstreamBuilds = build.getTransitiveUpstreamBuilds();
+        for(Entry<AbstractProject<?,?>,Integer> e : transitiveUpstreamBuilds.entrySet()){
+            AbstractBuild<?,?> run = e.getKey().getBuildByNumber(e.getValue());
+            if (run.hasChangeSetComputed()) {
+                ChangeLogSet<?> cls = run.getChangeSet();
+                if (cls != null) {
+                    changeLogSets.add(cls);
+                    upstreamChangeLogs.add(new UpstreamChangeLog(cls, run));
                 }
             }
         }
@@ -133,7 +130,7 @@ public class DisplayUpstreamChangesSummaryAction implements Action {
         List<AbstractBuild> upstreamBuilds = new ArrayList<AbstractBuild>();
         for(Cause cause: (List<Cause>) build.getCauses()){
             if(cause instanceof Cause.UpstreamCause) {
-                TopLevelItem upstreamProject = Hudson.getInstance().getItem(((Cause.UpstreamCause)cause).getUpstreamProject());
+                TopLevelItem upstreamProject = Hudson.getInstance().getItemByFullName(((Cause.UpstreamCause)cause).getUpstreamProject(), TopLevelItem.class);
                 if(upstreamProject instanceof AbstractProject){
                     int buildId = ((Cause.UpstreamCause)cause).getUpstreamBuild();
                     Run run = ((AbstractProject) upstreamProject).getBuildByNumber(buildId);
